@@ -136,6 +136,13 @@
     </div>
 
     <script>
+        // Display a welcome message when the page loads
+        window.onload = function() {
+            let chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += `<div class="message bot-message">Hello! How can I assist you today?</div>`;
+            chatBox.innerHTML += `<div class="message bot-message">Please enter a scrap material name to check its price.</div>`;
+        };
+
         // Handle Enter Key Press
         function handleKeyPress(event) {
             if (event.key === "Enter") {
@@ -156,7 +163,7 @@
             inputField.value = "";
 
             // Send request to Flask API
-            fetch("/get_price", {
+            fetch("https://your-chatbot.onrender.com/get_price", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ material: userText })
