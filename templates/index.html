@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scrap Price Chatbot</title>
     <style>
-        /* General Styles */
         body { 
             font-family: 'Arial', sans-serif;
             background-color: #121212;
@@ -41,6 +40,7 @@
             flex-grow: 1;
             padding: 15px;
             overflow-y: auto;
+            height: 100%;
             display: flex;
             flex-direction: column;
         }
@@ -119,21 +119,25 @@
         }
     </style>
 </head>
-<body>
+<body onload="startChat()">
 
     <div class="chat-container">
         <div class="chat-header">Scrap Price Chatbot 💬</div>
-        <div class="chat-box" id="chat-box">
-            <div class="message bot-message">Hello! 👋 Welcome to Scrap Price Chatbot.</div>
-            <div class="message bot-message">I can help you find the prices of different scrap materials. Just type the material name below! 📩</div>
-        </div>
+        <div class="chat-box" id="chat-box"></div>
         <div class="chat-input">
-            <input type="text" id="user-input" class="input-box" placeholder="Ask about scrap prices..." onkeypress="handleKeyPress(event)">
+            <input type="text" id="user-input" class="input-box" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
             <button class="send-btn" onclick="sendMessage()">Send</button>
         </div>
     </div>
 
     <script>
+        let sessionStage = "start";
+        let selectedMaterial = "";
+        
+        function startChat() {
+            displayMessage("Hello! How can I help you today? Do you have any waste scrap? (Yes/No)", "bot");
+        }
+
         function handleKeyPress(event) {
             if (event.key === "Enter") {
                 sendMessage();
@@ -145,28 +149,38 @@
             let userText = inputField.value.trim();
             if (userText === "") return;
 
-            let chatBox = document.getElementById("chat-box");
-            let userMessage = `<div class="message user-message">${userText}</div>`;
-            chatBox.innerHTML += userMessage;
-            chatBox.scrollTop = chatBox.scrollHeight;
+            displayMessage(userText, "user");
             inputField.value = "";
 
             fetch("/get_price", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ material: userText })
+                body: JSON.stringify({ material: userText, session: sessionStage, material_name: selectedMaterial })
             })
             .then(response => response.json())
             .then(data => {
-                let botMessage = `<div class="message bot-message">${data.response}`;
-                if (data.image) {
-                    botMessage += `<img src="${data.image}" alt="Scrap Image">`;
+                displayMessage(data.response, "bot");
+                if (sessionStage === "material_name") {
+                    selectedMaterial = userText.toLowerCase();
                 }
-                botMessage += `</div>`;
-                chatBox.innerHTML += botMessage;
-                chatBox.scrollTop = chatBox.scrollHeight;
+                updateSessionStage();
             })
             .catch(error => console.error("Error:", error));
+        }
+
+        function displayMessage(text, sender) {
+            let chatBox = document.getElementById("chat-box");
+            let message = `<div class="message ${sender}-message">${text}</div>`;
+            chatBox.innerHTML += message;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function updateSessionStage() {
+            const stages = ["start", "scrap_check", "material_name", "quantity", "book_agent", "address", "time_slot", "change_address"];
+            let currentIndex = stages.indexOf(sessionStage);
+            if (currentIndex < stages.length - 1) {
+                sessionStage = stages[currentIndex + 1];
+            }
         }
     </script>
 
