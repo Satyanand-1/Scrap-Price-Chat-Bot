@@ -19,7 +19,7 @@
         
         .chat-container { 
             width: 400px;
-            height: 500px; /* Fixed height */
+            height: 500px;
             background: #1e1e1e;
             border-radius: 15px;
             box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
@@ -40,13 +40,11 @@
         .chat-box {
             flex-grow: 1;
             padding: 15px;
-            overflow-y: auto; /* Enables scrolling */
-            height: 100%;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
         }
 
-        /* Message Bubbles */
         .message {
             max-width: 80%;
             padding: 10px;
@@ -78,7 +76,6 @@
             margin-left: 10px;
         }
 
-        /* Input Box */
         .chat-input {
             display: flex;
             background: #222;
@@ -112,7 +109,6 @@
             background: #3700b3;
         }
 
-        /* Scrollbar Styling */
         .chat-box::-webkit-scrollbar {
             width: 5px;
         }
@@ -121,14 +117,16 @@
             background: #6200ea;
             border-radius: 5px;
         }
-
     </style>
 </head>
 <body>
 
     <div class="chat-container">
         <div class="chat-header">Scrap Price Chatbot 💬</div>
-        <div class="chat-box" id="chat-box"></div>
+        <div class="chat-box" id="chat-box">
+            <div class="message bot-message">Hello! 👋 Welcome to Scrap Price Chatbot.</div>
+            <div class="message bot-message">I can help you find the prices of different scrap materials. Just type the material name below! 📩</div>
+        </div>
         <div class="chat-input">
             <input type="text" id="user-input" class="input-box" placeholder="Ask about scrap prices..." onkeypress="handleKeyPress(event)">
             <button class="send-btn" onclick="sendMessage()">Send</button>
@@ -136,14 +134,6 @@
     </div>
 
     <script>
-        // Display a welcome message when the page loads
-        window.onload = function() {
-            let chatBox = document.getElementById("chat-box");
-            chatBox.innerHTML += `<div class="message bot-message">Hello! How can I assist you today?</div>`;
-            chatBox.innerHTML += `<div class="message bot-message">Please enter a scrap material name to check its price.</div>`;
-        };
-
-        // Handle Enter Key Press
         function handleKeyPress(event) {
             if (event.key === "Enter") {
                 sendMessage();
@@ -155,15 +145,13 @@
             let userText = inputField.value.trim();
             if (userText === "") return;
 
-            // Display user message
             let chatBox = document.getElementById("chat-box");
             let userMessage = `<div class="message user-message">${userText}</div>`;
             chatBox.innerHTML += userMessage;
-            chatBox.scrollTop = chatBox.scrollHeight;  // Scroll down automatically
+            chatBox.scrollTop = chatBox.scrollHeight;
             inputField.value = "";
 
-            // Send request to Flask API
-            fetch("https://your-chatbot.onrender.com/get_price", {
+            fetch("/get_price", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ material: userText })
@@ -176,7 +164,7 @@
                 }
                 botMessage += `</div>`;
                 chatBox.innerHTML += botMessage;
-                chatBox.scrollTop = chatBox.scrollHeight;  // Scroll down automatically
+                chatBox.scrollTop = chatBox.scrollHeight;
             })
             .catch(error => console.error("Error:", error));
         }
